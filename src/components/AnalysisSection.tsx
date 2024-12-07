@@ -1,7 +1,7 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Wand2 } from "lucide-react";
+import { Wand2, Loader } from "lucide-react";
 import { AnalysisReport } from "@/components/AnalysisReport";
 import { LogViewer } from "@/components/LogViewer";
 import { ErrorCorrelation } from "@/components/ErrorCorrelation";
@@ -23,6 +23,14 @@ export const AnalysisSection = ({
   onGenerateAnalysis,
   onSaveAnalysis
 }: AnalysisSectionProps) => {
+  const [activeTab, setActiveTab] = React.useState("report");
+
+  React.useEffect(() => {
+    if (isGeneratingAnalysis) {
+      setActiveTab("agent-logs");
+    }
+  }, [isGeneratingAnalysis]);
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -37,11 +45,12 @@ export const AnalysisSection = ({
         </Button>
       </div>
 
-      <Tabs defaultValue="report" className="w-full">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList>
           <TabsTrigger value="report">Analysis Report</TabsTrigger>
           <TabsTrigger value="logs">Relevant Logs</TabsTrigger>
           <TabsTrigger value="correlation">Error Correlation</TabsTrigger>
+          <TabsTrigger value="agent-logs">Agent Logs</TabsTrigger>
         </TabsList>
         
         <TabsContent value="report">
@@ -63,6 +72,22 @@ export const AnalysisSection = ({
         
         <TabsContent value="correlation">
           <ErrorCorrelation workItemId={workItemId} />
+        </TabsContent>
+
+        <TabsContent value="agent-logs">
+          <div className="min-h-[300px] flex flex-col items-center justify-center p-6 bg-gray-50 rounded-lg border">
+            {isGeneratingAnalysis ? (
+              <div className="flex flex-col items-center gap-4">
+                <Loader className="h-8 w-8 animate-spin text-primary" />
+                <p className="text-gray-600">AI Agent is analyzing the logs...</p>
+              </div>
+            ) : (
+              <div className="text-center text-gray-500">
+                <p>No agent logs available.</p>
+                <p className="text-sm">Click "Generate AI Analysis" to start the analysis process.</p>
+              </div>
+            )}
+          </div>
         </TabsContent>
       </Tabs>
     </div>
